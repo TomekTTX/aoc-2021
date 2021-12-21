@@ -229,7 +229,6 @@ int max_distance(const std::vector<Scanner> &scanners) {
 int main() {
     std::vector<Scanner> normalized{};
     std::list<Scanner> unnormalized{};
-    std::unordered_set<Point> beacons{};
     
     Scanner s;  
     std::cin >> s;
@@ -257,11 +256,8 @@ int main() {
         norms.clear();
     }
     
-    for (const auto &s : normalized) {
+    for (const auto &s : normalized)
         std::cout << "scanner " << s.id << " is at " << s.location << '\n';
-        for (const auto &p : s.points)
-            beacons.insert(p);
-    }
             
     std::cout << "\nmaximum distance: " << max_distance(normalized) << '\n';
 }
