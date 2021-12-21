@@ -1,2 +1,3 @@
-# aoc-2021
-C++ solutions to Advent of Code 2021
+# AoC 2021
+A repo of my C++ solutions to Advent of Code 2021.
+Each task is contained within a single .cpp file.
