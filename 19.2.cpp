@@ -31,6 +31,12 @@ struct Point {
 		return ret;
 	}
 	
+	int manhattan(const Point &other) const {
+		return std::abs(x - other.x) +
+			   std::abs(y - other.y) +
+			   std::abs(z - other.z);
+	}
+	
 	void rotate(int rotate_no) {
 		const Point new_pt = interp()[rotate_no];
 		x = new_pt.x;
@@ -100,12 +106,13 @@ struct Point {
 
 struct Transformation {
 	int rotation = 0;
-	Point translation = {0,0,0};
+	Point translation{0,0,0};
 };
 
 struct Scanner {
 	int id = -1;
 	std::vector<Point> points{};
+	Point location{0,0,0};
 		
 	inline static bool valid_init(int ch) {
 		return ch == '-' || (ch >= '0' && ch <= '9');
@@ -116,6 +123,11 @@ struct Scanner {
 			p.rotate(t.rotation);
 			p += t.translation;
 		}
+		location = t.translation;
+	}
+	
+	inline int manhattan(const Scanner &other) const {
+		return location.manhattan(other.location);
 	}
 	
 	inline bool operator==(const Scanner &other) const {
@@ -168,9 +180,9 @@ namespace std {
     };
 }
 
-Transformation get_transf(Point max, const std::vector<Point> &ref, const std::vector<Point> &target) {
-	for (const auto &a : ref) {
-		for (const auto &b : target) {
+Transformation get_transf(Point max, const Scanner &ref, const Scanner &target) {
+	for (const auto &a : ref.points) {
+		for (const auto &b : target.points) {
 			const auto comp = a.relation_to(b);
 			for (std::size_t i = 0; i < comp.size(); ++i) {
 				if (comp[i] == max) {
@@ -197,10 +209,21 @@ bool normalize(const Scanner &ref, Scanner &target) {
 		return false;
 		
 	Point max_point = max_elem->first;
-	Transformation transf = get_transf(max_point, ref.points, target.points);
+	Transformation transf = get_transf(max_point, ref, target);
 	target.transform(transf);
 	
 	return true;
+}
+
+int max_distance(const std::vector<Scanner> &scanners) {
+	int distance = 0;
+	
+	for (const auto &s1 : scanners)
+		for (const auto &s2 : scanners)
+			if (!(s1 == s2))
+				distance = std::max(distance, s1.manhattan(s2));
+	
+	return distance;
 }
 
 int main() {
@@ -234,12 +257,23 @@ int main() {
 		norms.clear();
 	}
 	
-	for (const auto &s : normalized)
+	for (const auto &s : normalized) {
+		std::cout << "scanner " << s.id << " is at " << s.location << '\n';
 		for (const auto &p : s.points)
 			beacons.insert(p);
+	}
 			
-	std::cout << "\nbeacon count: " << beacons.size() << '\n';
+	std::cout << "\nmaximum distance: " << max_distance(normalized) << '\n';
 }
+
+
+
+
+
+
+
+
+
 
 
 
