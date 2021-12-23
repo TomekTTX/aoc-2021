@@ -11,8 +11,7 @@ constexpr int ten_turn_score(int player, int starting_pos) {
 }
 
 struct Die {
-	int rolls = 0;
-	int result = -3;
+	int result = -3, rolls = 0;
 	
 	int roll() {
 		rolls += 3;
@@ -33,6 +32,11 @@ struct Die {
 	void advance(int turns = 1) {
 		result = (result + 9 * turns) % 300;
 		rolls += 3 * turns;
+	}
+	
+	void reset() {
+		rolls = 0;
+		result = -3;
 	}
 };
 
@@ -55,7 +59,7 @@ std::array<int, 2> simulate(int p1_start_pos, int p2_start_pos, int turns, Die &
 	int score1 = (turns / 10) * ten_turn_score(1, p1_start_pos);
 	int score2 = (turns / 10) * ten_turn_score(2, p2_start_pos);
 	
-	die.advance((turns / 10) * 10);	
+	die.advance((turns / 10) * 20);	
 	for (int i = 0; i < turns % 10; ++i) {
 		score1 += (p1 += die.roll());
 		if (score1 >= 1000) break;
@@ -66,12 +70,36 @@ std::array<int, 2> simulate(int p1_start_pos, int p2_start_pos, int turns, Die &
 	return {score1, score2};
 }
 
+void simulate(int p1_start_pos, int p2_start_pos, Die &die) {
+	const int turns = std::min(
+		10000 / ten_turn_score(1, p1_start_pos),
+		10000 / ten_turn_score(2, p2_start_pos)
+	);
+	
+	const auto result = simulate(p1_start_pos, p2_start_pos, turns + 1, die);
+	std::cout << "Player 1 score: " << result[0] << '\n'
+			  << "Player 2 score: " << result[1] << '\n'
+			  << "Rolls: " << die.rolls << '\n';
+}
+
 int main() {
 	Die die{};
 	
-	const auto result = simulate(4, 8, 166, die);
-	std::cout << result[0] << ' ' << result[1] << '\n';
+	simulate(1, 2, die);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
